@@ -2,11 +2,14 @@ package app.mygdx.music;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.math.Vector3;
 
 import java.awt.Color;
 
@@ -16,11 +19,14 @@ public class MyGdxMusic extends ApplicationAdapter {
 
 	//Explicit
 	private SpriteBatch batch;
-	private Texture wallpaperTexture, cloudTexture;
+	private Texture wallpaperTexture, cloudTexture, pigTexture;//ประกาศตัวแปรรูปภาพ
 	private OrthographicCamera objOrthographicCamera;
 	private BitmapFont nameBitmapFont; //เขียนตัวอักษรที่อยู่บนเกม
 	private int xCloudAnInt, yCloudAnInt = 600; //กำหนดความสูงของภาพ
 	private boolean cloudABoolean = true;
+	private Rectangle pigRectangle; //ต้องหา rectangle ของ badlogic
+	private Vector3 objVector3;//ต้องหา Vector3 ของ badlogic
+	private Sound pigSound; //ต้องหา Sound ของ badlogic
 
 
 	@Override
@@ -35,11 +41,25 @@ public class MyGdxMusic extends ApplicationAdapter {
 
 		//setup BitMapFont
 		nameBitmapFont = new BitmapFont();
-		nameBitmapFont.setColor(com.badlogic.gdx.graphics.Color.BLACK); //font color
+		nameBitmapFont.setColor(com.badlogic.gdx.graphics.Color.RED); //font color
 		nameBitmapFont.setScale(4); //font size
 
 		//Setup Cloud
 		cloudTexture = new Texture("cloud.png");
+
+		//Setup Pig ไว้กำหนดรูปภาพ
+		pigTexture = new Texture("pig.png");
+
+		//Setup Rectangle Pic
+		pigRectangle = new Rectangle();
+		pigRectangle.x = 568;
+		pigRectangle.y = 100;
+		pigRectangle.width = 64; //ขนาดของภาพหมู
+		pigRectangle.height = 64; //ขนาดของภาพหมู
+
+		//Setup PigSound
+		pigSound = Gdx.audio.newSound(Gdx.files.internal("pig.wav"));
+
 
 	}//Create
 
@@ -64,13 +84,48 @@ public class MyGdxMusic extends ApplicationAdapter {
 		//Drawable BitMapFont
 		nameBitmapFont.draw(batch, "Coins PBRU", 50, 750);
 
+		//Drawable Pig
+		batch.draw(pigTexture, pigRectangle.x, pigRectangle.y);
 
 		batch.end();
 
 		//Move Cloud
 		moveCloud();
 
+		//Active When Touch Screen
+		activeTouchScreen();
+
 	}//render
+
+	private void activeTouchScreen() {
+		if (Gdx.input.isTouched()) { //เมื่อมีนิ้วแตะที่จอจะทำงาน
+
+			//Sound Effect Pig
+			pigSound.play();
+
+			objVector3 = new Vector3(); //Vector3 คือ เก็บค่าที่นิ้วไปโดน
+			objVector3.set(Gdx.input.getX(), Gdx.input.getY(), 0);
+
+			if (objVector3.x < 600) { //เลื่อนหมูไปซ้ายขวา จากการแตะจอ โดยยึดจากกึ่งกลางจอ
+				if (pigRectangle.x < 0) {
+					pigRectangle.x = 0;
+				} else {
+					pigRectangle.x -= 10;
+				}
+
+			} else {
+				if (pigRectangle.x > 1136) {
+					pigRectangle.x = 1136;
+				} else {
+					pigRectangle.x += 10;
+				}
+
+			}
+
+
+		}// if
+
+	} //activeTouchScreen
 
 	private void moveCloud() {
 		if (cloudABoolean) {
