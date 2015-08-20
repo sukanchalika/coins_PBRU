@@ -16,12 +16,13 @@ public class MyGdxMusic extends ApplicationAdapter {
 
 	//Explicit
 	private SpriteBatch batch;
-	private Texture wallpaperTexture;
+	private Texture wallpaperTexture, cloudTexture;
 	private OrthographicCamera objOrthographicCamera;
 	private BitmapFont nameBitmapFont; //เขียนตัวอักษรที่อยู่บนเกม
+	private int xCloudAnInt, yCloudAnInt = 600; //กำหนดความสูงของภาพ
+	private boolean cloudABoolean = true;
 
 
-	
 	@Override
 	public void create () {//เอาไว้กำหนดค่า
 		batch = new SpriteBatch();
@@ -36,6 +37,9 @@ public class MyGdxMusic extends ApplicationAdapter {
 		nameBitmapFont = new BitmapFont();
 		nameBitmapFont.setColor(com.badlogic.gdx.graphics.Color.BLACK); //font color
 		nameBitmapFont.setScale(4); //font size
+
+		//Setup Cloud
+		cloudTexture = new Texture("cloud.png");
 
 	}//Create
 
@@ -54,10 +58,34 @@ public class MyGdxMusic extends ApplicationAdapter {
 		//Drawable wallpaper
 		batch.draw(wallpaperTexture, 0, 0);
 
+		//Drawable Cloud
+		batch.draw(cloudTexture, xCloudAnInt, yCloudAnInt);
+
 		//Drawable BitMapFont
-		nameBitmapFont.draw(batch, "Coins PBRU", 50, 600);
+		nameBitmapFont.draw(batch, "Coins PBRU", 50, 750);
 
 
 		batch.end();
+
+		//Move Cloud
+		moveCloud();
+
 	}//render
+
+	private void moveCloud() {
+		if (cloudABoolean) {
+			if (xCloudAnInt < 937) {
+				xCloudAnInt += 100 * Gdx.graphics.getDeltaTime();
+			} else {
+				cloudABoolean = !cloudABoolean;
+			}
+		} else {
+			if (xCloudAnInt > 0) {
+				xCloudAnInt -= 100 * Gdx.graphics.getDeltaTime();
+			} else {
+				cloudABoolean = !cloudABoolean;
+			}
+
+		}
+	} //moveCloud
 }//Main Class
