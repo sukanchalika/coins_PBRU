@@ -25,7 +25,7 @@ public class MyGdxMusic extends ApplicationAdapter {
 	private SpriteBatch batch;
 	private Texture wallpaperTexture, cloudTexture, pigTexture, coinsTexture;//
 	private OrthographicCamera objOrthographicCamera;
-	private BitmapFont nameBitmapFont; //
+	private BitmapFont nameBitmapFont, scoreBitmapFont; //
 	private int xCloudAnInt, yCloudAnInt = 600; //
 	private boolean cloudABoolean = true;
 	private Rectangle pigRectangle, coinsRectangle; //rectangle ==> badlogic
@@ -34,6 +34,7 @@ public class MyGdxMusic extends ApplicationAdapter {
 	private Array<Rectangle> coinsArray; //Array of Badlogic
 	private long lastDropCoins; //random coins and new position
 	private Iterator<Rectangle> coinsIterator; //Interator ==> Java.util
+	private int scoreAnInt = 0;
 
 
 	@Override
@@ -80,6 +81,11 @@ public class MyGdxMusic extends ApplicationAdapter {
 		//Setup CoinsDropSound
 		coinsDropSound = Gdx.audio.newSound(Gdx.files.internal("coins_drop.wav"));
 
+		//Setup ScoreBitMapFont
+		scoreBitmapFont = new BitmapFont();
+		scoreBitmapFont.setColor(com.badlogic.gdx.graphics.Color.BLUE);
+		scoreBitmapFont.setScale(4); //font size
+
 
 	}//Create
 
@@ -105,7 +111,7 @@ public class MyGdxMusic extends ApplicationAdapter {
 		objOrthographicCamera.update();
 		batch.setProjectionMatrix(objOrthographicCamera.combined);
 
-		//object
+		//เอาไว้วาด object
 		batch.begin();
 
 		//Drawable wallpaper
@@ -123,8 +129,11 @@ public class MyGdxMusic extends ApplicationAdapter {
 		//Drawable Coins
 		for (Rectangle forCoins: coinsArray) {
 			batch.draw(coinsTexture, forCoins.x, forCoins.y);
-
 		}
+
+		//Drawable Score
+		scoreBitmapFont.draw(batch, "Score = " + Integer.toString(scoreAnInt), 700, 750);
+		//interger.toString เป็นตัวเลขไปเป็นตัวอักษร ตำแหน่งตัวอักษร 700, 750
 
 		batch.end();
 
