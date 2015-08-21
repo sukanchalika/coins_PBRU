@@ -23,14 +23,14 @@ public class MyGdxMusic extends ApplicationAdapter {
 
 	//Explicit
 	private SpriteBatch batch;
-	private Texture wallpaperTexture, cloudTexture, pigTexture, coinsTexture;//��С�ȵ�����ٻ�Ҿ
+	private Texture wallpaperTexture, cloudTexture, pigTexture, coinsTexture;//
 	private OrthographicCamera objOrthographicCamera;
-	private BitmapFont nameBitmapFont; //��¹����ѡ�÷�����躹��
-	private int xCloudAnInt, yCloudAnInt = 600; //��˹������٧�ͧ�Ҿ
+	private BitmapFont nameBitmapFont; //
+	private int xCloudAnInt, yCloudAnInt = 600; //
 	private boolean cloudABoolean = true;
-	private Rectangle pigRectangle, coinsRectangle; //��ͧ�� rectangle �ͧ badlogic
-	private Vector3 objVector3;//��ͧ�� Vector3 �ͧ badlogic
-	private Sound pigSound; //��ͧ�� Sound �ͧ badlogic
+	private Rectangle pigRectangle, coinsRectangle; //rectangle ==> badlogic
+	private Vector3 objVector3;//Vector3 ==> badlogic
+	private Sound pigSound; //Sound ==> badlogic
 	private Array<Rectangle> coinsArray; //Array of Badlogic
 	private long lastDropCoins; //random coins and new position
 	private Iterator<Rectangle> coinsIterator; //Interator ==> Java.util
@@ -38,9 +38,9 @@ public class MyGdxMusic extends ApplicationAdapter {
 
 
 	@Override
-	public void create () {//�������˹����
+	public void create () {//
 		batch = new SpriteBatch();
-		// ��͡�á�˹���Ҵ�ͧ�ͷ���ͧ���
+		//
 		objOrthographicCamera = new OrthographicCamera();
 		objOrthographicCamera.setToOrtho(false, 1200, 800);
 
@@ -55,15 +55,15 @@ public class MyGdxMusic extends ApplicationAdapter {
 		//Setup Cloud
 		cloudTexture = new Texture("cloud.png");
 
-		//Setup Pig ����˹��ٻ�Ҿ
+		//Setup Pig
 		pigTexture = new Texture("pig.png");
 
 		//Setup Rectangle Pic
 		pigRectangle = new Rectangle();
 		pigRectangle.x = 568;
 		pigRectangle.y = 100;
-		pigRectangle.width = 64; //��Ҵ�ͧ�Ҿ���
-		pigRectangle.height = 64; //��Ҵ�ͧ�Ҿ���
+		pigRectangle.width = 64; //ความกว้างของรูปหมู
+		pigRectangle.height = 64; //ความสูงของรูปหมู
 
 		//Setup PigSound
 		pigSound = Gdx.audio.newSound(Gdx.files.internal("pig.wav"));
@@ -91,15 +91,15 @@ public class MyGdxMusic extends ApplicationAdapter {
 	} //coinsRandomDrop
 
 	@Override
-	public void render () {// render ��ǹ���� loop
+	public void render () {// render loop
 		Gdx.gl.glClearColor(1, 0, 0, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-		//Setup Screen ��Ѻ������ѵ��ѵ
+		//Setup Screen
 		objOrthographicCamera.update();
 		batch.setProjectionMatrix(objOrthographicCamera.combined);
 
-		//�������Ҵ object
+		//object
 		batch.begin();
 
 		//Drawable wallpaper
@@ -114,6 +114,12 @@ public class MyGdxMusic extends ApplicationAdapter {
 		//Drawable Pig
 		batch.draw(pigTexture, pigRectangle.x, pigRectangle.y);
 
+		//Drawable Coins
+		for (Rectangle forCoins: coinsArray) {
+			batch.draw(coinsTexture, forCoins.x, forCoins.y);
+
+		}
+
 		batch.end();
 
 		//Move Cloud
@@ -122,18 +128,45 @@ public class MyGdxMusic extends ApplicationAdapter {
 		//Active When Touch Screen
 		activeTouchScreen();
 
+		//Random Drop Coins
+		randomDropCoins();
+
+
+
 	}//render
 
+	private void randomDropCoins() {
+		if (TimeUtils.nanoTime() - lastDropCoins > 1E9) {//1E9 => 10^9 random every 1 second
+			coinsRandomDrop();
+		}
+		coinsIterator = coinsArray.iterator();
+		while (coinsIterator.hasNext()) {//มีค่าต่อไปเรื่อยๆ
+			Rectangle myCoinsRectangle = coinsIterator.next();
+			myCoinsRectangle.y -= 50 * Gdx.graphics.getDeltaTime(); //coins drop speed 50
+
+			//When Coins into Floor
+			if (myCoinsRectangle.y +64 < 0 ) {
+				coinsIterator.remove(); //clear when coins drop to floor
+
+			}
+
+
+
+		}
+
+	} //randomDropCoins
+
 	private void activeTouchScreen() {
-		if (Gdx.input.isTouched()) { //������չ����з��ͨзӧҹ
+		if (Gdx.input.isTouched()) { //มีการสัมผัสที่จอภาพ
 
 			//Sound Effect Pig
 			pigSound.play();
 
-			objVector3 = new Vector3(); //Vector3 ��� �纤�ҷ������ⴹ
+			objVector3 = new Vector3(); //Vector3
 			objVector3.set(Gdx.input.getX(), Gdx.input.getY(), 0);
 
-			if (objVector3.x < 600) { //����͹���仫��¢�� �ҡ����Ш� ���ִ�ҡ��觡�ҧ��
+
+			if (objVector3.x < 600) { //
 				if (pigRectangle.x < 0) {
 					pigRectangle.x = 0;
 				} else {
