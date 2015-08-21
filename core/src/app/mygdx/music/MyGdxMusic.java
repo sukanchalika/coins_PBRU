@@ -8,10 +8,14 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.TimeUtils;
 
 import java.awt.Color;
+import java.util.Iterator;
 
 import javax.xml.ws.BindingType;
 
@@ -19,20 +23,24 @@ public class MyGdxMusic extends ApplicationAdapter {
 
 	//Explicit
 	private SpriteBatch batch;
-	private Texture wallpaperTexture, cloudTexture, pigTexture;//»ÃĞ¡ÒÈµÑÇá»ÃÃÙ»ÀÒ¾
+	private Texture wallpaperTexture, cloudTexture, pigTexture, coinsTexture;//ï¿½ï¿½Ğ¡ï¿½Èµï¿½ï¿½ï¿½ï¿½ï¿½Ù»ï¿½Ò¾
 	private OrthographicCamera objOrthographicCamera;
-	private BitmapFont nameBitmapFont; //à¢ÕÂ¹µÑÇÍÑ¡ÉÃ·ÕèÍÂÙèº¹à¡Á
-	private int xCloudAnInt, yCloudAnInt = 600; //¡ÓË¹´¤ÇÒÁÊÙ§¢Í§ÀÒ¾
+	private BitmapFont nameBitmapFont; //ï¿½ï¿½Â¹ï¿½ï¿½ï¿½ï¿½Ñ¡ï¿½Ã·ï¿½ï¿½ï¿½ï¿½ï¿½èº¹ï¿½ï¿½
+	private int xCloudAnInt, yCloudAnInt = 600; //ï¿½ï¿½Ë¹ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ù§ï¿½Í§ï¿½Ò¾
 	private boolean cloudABoolean = true;
-	private Rectangle pigRectangle; //µéÍ§ËÒ rectangle ¢Í§ badlogic
-	private Vector3 objVector3;//µéÍ§ËÒ Vector3 ¢Í§ badlogic
-	private Sound pigSound; //µéÍ§ËÒ Sound ¢Í§ badlogic
+	private Rectangle pigRectangle, coinsRectangle; //ï¿½ï¿½Í§ï¿½ï¿½ rectangle ï¿½Í§ badlogic
+	private Vector3 objVector3;//ï¿½ï¿½Í§ï¿½ï¿½ Vector3 ï¿½Í§ badlogic
+	private Sound pigSound; //ï¿½ï¿½Í§ï¿½ï¿½ Sound ï¿½Í§ badlogic
+	private Array<Rectangle> coinsArray; //Array of Badlogic
+	private long lastDropCoins; //random coins and new position
+	private Iterator<Rectangle> coinsIterator; //Interator ==> Java.util
+
 
 
 	@Override
-	public void create () {//àÍÒäÇé¡ÓË¹´¤èÒ
+	public void create () {//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ë¹ï¿½ï¿½ï¿½ï¿½
 		batch = new SpriteBatch();
-		// ¤×Í¡ÒÃ¡ÓË¹´¢¹Ò´¢Í§¨Í·ÕèµéÍ§¡ÒÃ
+		// ï¿½ï¿½Í¡ï¿½Ã¡ï¿½Ë¹ï¿½ï¿½ï¿½Ò´ï¿½Í§ï¿½Í·ï¿½ï¿½ï¿½Í§ï¿½ï¿½ï¿½
 		objOrthographicCamera = new OrthographicCamera();
 		objOrthographicCamera.setToOrtho(false, 1200, 800);
 
@@ -47,32 +55,51 @@ public class MyGdxMusic extends ApplicationAdapter {
 		//Setup Cloud
 		cloudTexture = new Texture("cloud.png");
 
-		//Setup Pig äÇé¡ÓË¹´ÃÙ»ÀÒ¾
+		//Setup Pig ï¿½ï¿½ï¿½ï¿½Ë¹ï¿½ï¿½Ù»ï¿½Ò¾
 		pigTexture = new Texture("pig.png");
 
 		//Setup Rectangle Pic
 		pigRectangle = new Rectangle();
 		pigRectangle.x = 568;
 		pigRectangle.y = 100;
-		pigRectangle.width = 64; //¢¹Ò´¢Í§ÀÒ¾ËÁÙ
-		pigRectangle.height = 64; //¢¹Ò´¢Í§ÀÒ¾ËÁÙ
+		pigRectangle.width = 64; //ï¿½ï¿½Ò´ï¿½Í§ï¿½Ò¾ï¿½ï¿½ï¿½
+		pigRectangle.height = 64; //ï¿½ï¿½Ò´ï¿½Í§ï¿½Ò¾ï¿½ï¿½ï¿½
 
 		//Setup PigSound
 		pigSound = Gdx.audio.newSound(Gdx.files.internal("pig.wav"));
 
+		//Setup Coins
+		coinsTexture = new Texture("coins.png");
+
+		//Create coinsArray à¸ˆà¸³à¸™à¸§à¸™à¹€à¸«à¸£à¸µà¸¢à¸à¸—à¸µà¹ˆà¸•à¸à¸¥à¸‡à¸¡à¸²
+		coinsArray = new Array<Rectangle>();
+		coinsRandomDrop(); //à¸•à¸³à¹à¸«à¸™à¹ˆà¸‡à¸—à¸µà¹ˆà¸•à¹‰à¸­à¸‡à¸à¸²à¸£à¸ªà¸¸à¹ˆà¸¡à¹ƒà¸«à¹‰à¹€à¸«à¸£à¸µà¸¢à¸à¸•à¸
 
 	}//Create
 
+	private void coinsRandomDrop() {
+		coinsRectangle = new Rectangle();
+		coinsRectangle.x = MathUtils.random(0, 1136);
+		//à¸à¸´à¸à¸±à¸”à¸‚à¸­à¸‡à¹€à¸«à¸£à¸µà¸¢à¸à¸”à¹‰à¸²à¸™à¹à¸à¸™ x ==> badlogic à¹€à¸¥à¸·à¸­à¸ random(float start) 1200-64 = 1136
+		coinsRectangle.y = 800; //à¹€à¸«à¸£à¸µà¸¢à¸à¸•à¸à¸¡à¸²à¸ˆà¸²à¸à¸”à¹‰à¸²à¸™à¸šà¸™
+		coinsRectangle.width = 64;
+		coinsRectangle.height = 64;
+		coinsArray.add(coinsRectangle);
+		lastDropCoins = TimeUtils.nanoTime(); // TimeUtils ==> badlogic
+
+
+	} //coinsRandomDrop
+
 	@Override
-	public void render () {// render µÑÇ¹Õé¤×Í loop
+	public void render () {// render ï¿½ï¿½Ç¹ï¿½ï¿½ï¿½ï¿½ loop
 		Gdx.gl.glClearColor(1, 0, 0, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-		//Setup Screen »ÃÑº¨ÍãËéÍÑµâ¹ÁÑµ
+		//Setup Screen ï¿½ï¿½Ñºï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ñµï¿½ï¿½Ñµ
 		objOrthographicCamera.update();
 		batch.setProjectionMatrix(objOrthographicCamera.combined);
 
-		//àÍÒäÇéÇÒ´ object
+		//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ò´ object
 		batch.begin();
 
 		//Drawable wallpaper
@@ -98,15 +125,15 @@ public class MyGdxMusic extends ApplicationAdapter {
 	}//render
 
 	private void activeTouchScreen() {
-		if (Gdx.input.isTouched()) { //àÁ×èÍÁÕ¹ÔéÇáµĞ·Õè¨Í¨Ğ·Ó§Ò¹
+		if (Gdx.input.isTouched()) { //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Õ¹ï¿½ï¿½ï¿½ï¿½Ğ·ï¿½ï¿½Í¨Ğ·Ó§Ò¹
 
 			//Sound Effect Pig
 			pigSound.play();
 
-			objVector3 = new Vector3(); //Vector3 ¤×Í à¡çº¤èÒ·Õè¹ÔéÇä»â´¹
+			objVector3 = new Vector3(); //Vector3 ï¿½ï¿½ï¿½ ï¿½çº¤ï¿½Ò·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½â´¹
 			objVector3.set(Gdx.input.getX(), Gdx.input.getY(), 0);
 
-			if (objVector3.x < 600) { //àÅ×èÍ¹ËÁÙä»«éÒÂ¢ÇÒ ¨Ò¡¡ÒÃáµĞ¨Í â´ÂÂÖ´¨Ò¡¡Öè§¡ÅÒ§¨Í
+			if (objVector3.x < 600) { //ï¿½ï¿½ï¿½ï¿½Í¹ï¿½ï¿½ï¿½ä»«ï¿½ï¿½Â¢ï¿½ï¿½ ï¿½Ò¡ï¿½ï¿½ï¿½ï¿½Ğ¨ï¿½ ï¿½ï¿½ï¿½Ö´ï¿½Ò¡ï¿½ï¿½è§¡ï¿½Ò§ï¿½ï¿½
 				if (pigRectangle.x < 0) {
 					pigRectangle.x = 0;
 				} else {
