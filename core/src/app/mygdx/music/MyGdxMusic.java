@@ -30,11 +30,10 @@ public class MyGdxMusic extends ApplicationAdapter {
 	private boolean cloudABoolean = true;
 	private Rectangle pigRectangle, coinsRectangle; //rectangle ==> badlogic
 	private Vector3 objVector3;//Vector3 ==> badlogic
-	private Sound pigSound; //Sound ==> badlogic
+	private Sound pigSound, waterDropSound, coinsDropSound; //Sound ==> badlogic
 	private Array<Rectangle> coinsArray; //Array of Badlogic
 	private long lastDropCoins; //random coins and new position
 	private Iterator<Rectangle> coinsIterator; //Interator ==> Java.util
-
 
 
 	@Override
@@ -74,6 +73,13 @@ public class MyGdxMusic extends ApplicationAdapter {
 		//Create coinsArray จำนวนเหรียญที่ตกลงมา
 		coinsArray = new Array<Rectangle>();
 		coinsRandomDrop(); //ตำแหน่งที่ต้องการสุ่มให้เหรียญตก
+
+		//Setup WaterDrop
+		waterDropSound = Gdx.audio.newSound(Gdx.files.internal("water_drop.wav"));
+
+		//Setup CoinsDropSound
+		coinsDropSound = Gdx.audio.newSound(Gdx.files.internal("coins_drop.wav"));
+
 
 	}//Create
 
@@ -132,7 +138,6 @@ public class MyGdxMusic extends ApplicationAdapter {
 		randomDropCoins();
 
 
-
 	}//render
 
 	private void randomDropCoins() {
@@ -146,13 +151,18 @@ public class MyGdxMusic extends ApplicationAdapter {
 
 			//When Coins into Floor
 			if (myCoinsRectangle.y +64 < 0 ) {
-				coinsIterator.remove(); //clear when coins drop to floor
+				waterDropSound.play(); //เมื่อเหรียญหล่นพื้นให้เกิดเสียง
+				coinsIterator.remove(); //clear coins when coins drop to floor เคลียค่าหน่วยความจำเมื่อเหรียญหล่นพื้น
+			}//if
 
-			}
+			//When Coins Overlap Pig
+			if (myCoinsRectangle.overlaps(pigRectangle)) {//เหรียญซ้อนทับกับหมู
+				coinsDropSound.play();
+				coinsIterator.remove(); //ให้เหรียญหายไปตอนเหรียญซ้อนทับกับหมู
+			}//if
 
 
-
-		}
+		}//while loop
 
 	} //randomDropCoins
 

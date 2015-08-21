@@ -8,12 +8,12 @@
 
     <application
         android:allowBackup="true"
-        android:icon="@drawable/ic_launcher"
-        android:label="@string/app_name"
+        android:icon="@drawable/pig"
+        android:label="Coins PBRU"
         android:theme="@style/GdxTheme" >
         <activity
             android:name="app.mygdx.music.android.AndroidLauncher"
-            android:label="@string/app_name" 
+            android:label="Coins PBRU"
             android:screenOrientation="landscape"
             android:configChanges="keyboard|keyboardHidden|orientation|screenSize">
             <intent-filter>
